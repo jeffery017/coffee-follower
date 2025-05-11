@@ -1,7 +1,7 @@
 'use client';
 
 import { RecipeRepository } from '@/utils/firebase/RecipeRepository';
-import { RecipeAction, recipeSchema, Roast, Step, stepActionType } from '@/utils/schemas/Recipe';
+import { RecipeAction, recipeSchema, Roast, Step } from '@/utils/schemas/Recipe';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import StepForm from './StepForm';
@@ -9,21 +9,30 @@ import StepForm from './StepForm';
 export default function CreateRecipeForm() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [steps, setSteps] = useState<Step[]>([{ actions: [{ action: stepActionType.CENTER_POURING, instruction: '' }] }]);
+  const [steps, setSteps] = useState<Step[]>([{actions: [{}]}]);
 
   const addStep = () => {
-    setSteps([...steps, { actions: [{ action: stepActionType.CENTER_POURING, instruction: '' }] }]);
+    setSteps([...steps, { actions: [{}] }]);
   };
 
   const addAction = (stepIndex: number) => {
     const newSteps = [...steps];
-    newSteps[stepIndex].actions.push({ action: stepActionType.CENTER_POURING, instruction: '' });
+    newSteps[stepIndex].actions.push({});
     setSteps(newSteps);
   };
 
   const updateAction = (stepIndex: number, actionIndex: number, updatedAction: RecipeAction) => {
     const newSteps = [...steps];
     newSteps[stepIndex].actions[actionIndex] = updatedAction;
+    setSteps(newSteps);
+  };
+
+  const updateStep = (stepIndex: number, field: keyof Step, value: Step[keyof Step]) => {
+    const newSteps = [...steps];
+    newSteps[stepIndex] = {
+      ...newSteps[stepIndex],
+      [field]: value
+    };
     setSteps(newSteps);
   };
 
@@ -172,6 +181,7 @@ export default function CreateRecipeForm() {
               onUpdateAction={updateAction}
               onRemoveAction={removeAction}
               onRemoveStep={removeStep}
+              onUpdateStep={updateStep}
             />
           ))}
         </div>

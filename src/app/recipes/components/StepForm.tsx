@@ -1,5 +1,5 @@
 import { RecipeAction, Step } from '@/utils/schemas/Recipe';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import ActionForm from './ActionForm';
 import RemoveButton from './RemoveButton';
 import StepProgress from './StepProgress';
@@ -11,6 +11,7 @@ interface StepFormProps {
   onUpdateAction: (stepIndex: number, actionIndex: number, action: RecipeAction) => void;
   onRemoveAction: (stepIndex: number, actionIndex: number) => void;
   onRemoveStep: (stepIndex: number) => void;
+  onUpdateStep: (stepIndex: number, field: keyof Step, value: Step[keyof Step]) => void;
 }
 
 export default function StepForm({
@@ -20,20 +21,51 @@ export default function StepForm({
   onUpdateAction,
   onRemoveAction,
   onRemoveStep,
+  onUpdateStep,
 }: StepFormProps) {
-  const [selectedAction, setSelectedAction] = useState<number | undefined>(undefined);
+  const [selectedAction, setSelectedAction] = useState<number | undefined>(0);
+
+  // Set default step title on mount if not set
+  useEffect(() => {
+    if (!step.title) {
+      onUpdateStep(stepIndex, 'title', `Step ${stepIndex + 1}`);
+    }
+  }, []); // Empty dependency array means this runs once on mount
 
   return (
-    <div className="flex flex-col border rounded-2xl p-4 gap-4 bg-indigo-50 border-indigo-200 overflow-y-auto relative"
+    <div className="flex flex-col border rounded-2xl gap-4 px-3 py-2 bg-white shadow-lg border-indigo-200 overflow-y-auto relative"
     onClick={() => setSelectedAction(undefined)}
-    >
+    > 
 
-      <div className="flex justify-between items-center"> 
-        <RemoveButton 
-          onClick={() => onRemoveStep(stepIndex)} 
-          title="Remove step"
-          className="absolute top-2 right-2 p-1.5"
-        />
+      {/* Step Title and Description */}
+      <div className="">
+        <div className="flex flex-col gap-2"> 
+          <div className='flex items-center gap-2 justify-between'>
+            <input
+              type="text"
+              id={`step-title-${stepIndex}`}
+              value={step.title || ''}
+              onChange={(e) => onUpdateStep(stepIndex, 'title', e.target.value)}
+              placeholder="Step Title"
+              className="text-lg font-bold p-2 w-full outline-none focus:border-gray-400 "
+            /> 
+            <RemoveButton 
+              onClick={() => onRemoveStep(stepIndex)} 
+              title="Remove step"
+              className=""
+            />
+          </div>
+          <textarea
+            id={`step-description-${stepIndex}`}
+            value={step.description || ''}
+            onChange={(e) => onUpdateStep(stepIndex, 'description', e.target.value)}
+            placeholder="Description"
+            rows={2}
+            className="p-2 block w-full outline-none bg-neutral-100 rounded-md focus:border-gray-400"
+          />
+        </div>
+        <div> 
+        </div>
       </div>
 
       <div className="flex">
@@ -65,7 +97,7 @@ export default function StepForm({
           e.stopPropagation();
           onAddAction(stepIndex);
         }}
-        className="w-10 h-10 mx-auto inline-flex items-center justify-center rounded-full border-1 border-neutral-400 text-sm font-medium text-neutral-700 bg-neutral-100 hover:bg-white focus:outline-none shadow-md transition-colors duration-200"
+        className="w-10 h-10 mx-auto inline-flex items-center justify-center rounded-full border-1 border-neutral-400 text-sm font-medium text-neutral-700 bg-white focus:outline-none shadow-md transition-colors duration-200"
         title="Add Action"
       >
         <svg className="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">

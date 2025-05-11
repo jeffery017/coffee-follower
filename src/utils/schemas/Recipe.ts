@@ -23,13 +23,15 @@ export enum stepActionType {
 // Schema for recipe steps
 export const actionSchema = z.object({ 
   action: z.nativeEnum(stepActionType).optional(),
-  instruction: z.string().optional(),
   duration: z.number().min(0, "Duration cannot be negative").optional(),
+  instruction: z.string().optional(),
   imageUrl: z.string().url().optional(),
   targetQuantity: z.number().positive("Target quantity must be positive").optional(),
 });
 
 const stepSchema = z.object({
+  title: z.string().optional(),
+  description: z.string().optional(),
   actions: z.array(actionSchema).min(1, "At least one action is required"),
 });
 

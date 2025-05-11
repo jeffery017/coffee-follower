@@ -26,7 +26,7 @@ const actionBorderColors = {
 
 export default function ActionForm({ action, onUpdate, onRemove, isSelected = false }: ActionFormProps) {
   const handleActionTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newActionType = e.target.value as stepActionType;
+    const newActionType = e.target.value ? (e.target.value as stepActionType) : undefined;
     onUpdate({ 
       ...action,
       action: newActionType,
@@ -38,8 +38,10 @@ export default function ActionForm({ action, onUpdate, onRemove, isSelected = fa
   };
 
   const isPouring = action.action === stepActionType.CENTER_POURING || action.action === stepActionType.SIDE_POURING;
-  const actionSummary = `${actionTypeDisplayNames[action.action as stepActionType]}${isPouring && action.targetQuantity ? ` ${action.targetQuantity}g` : ''}${action.duration ? ` for ${action.duration}s` : ''}`;
-  const borderColor = actionBorderColors[action.action as stepActionType];
+  const actionSummary = action.action 
+    ? `${actionTypeDisplayNames[action.action]}${isPouring && action.targetQuantity ? ` ${action.targetQuantity}g` : ''}${action.duration ? ` for ${action.duration}s` : ''}`
+    : 'Select an Action';
+  const borderColor = action.action ? actionBorderColors[action.action] : 'border-gray-300';
 
   if (!isSelected) {
     return (
@@ -53,7 +55,6 @@ export default function ActionForm({ action, onUpdate, onRemove, isSelected = fa
               {action.instruction}
             </div>
           </div>
-          <RemoveButton onClick={onRemove} title="Remove action" />
         </div>
       </div>
     );
@@ -70,10 +71,11 @@ export default function ActionForm({ action, onUpdate, onRemove, isSelected = fa
         <div className="flex flex-wrap gap-2 items-center w-full">
           {/* Action Type */}
           <select
-            value={action.action}
+            value={action.action || ''}
             onChange={handleActionTypeChange}
             className="p-2 block rounded-md border border-gray-300 bg-white outline-none focus:border-gray-400 flex-shrink-0 min-w-[120px]"
           >
+            <option value="">Select Action</option>
             {Object.entries(stepActionType)
               .filter(([key]) => isNaN(Number(key)))
               .map(([key, value]) => (
