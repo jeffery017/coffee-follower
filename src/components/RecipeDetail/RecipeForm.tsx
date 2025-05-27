@@ -2,7 +2,6 @@
 
 import { RecipeRepository } from '@/utils/firebase/RecipeRepository';
 import { Recipe, recipeSchema, RecipeStep, Roast } from '@/utils/schemas/Recipe';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import PlusButton from '../common/PlusButton';
@@ -178,19 +177,12 @@ export default function RecipeSettings({ recipeId, editMode = false }: Props) {
   }
 
   return (
-    <div className='container mx-auto' > 
-      <Link href="/recipes" 
-        className='mt-2'
-      >
-        {/* Title */}
-        <h2 className="text-xl font-semibold">Recipe Follower</h2>
-        {/* Save Recipe Button */} 
-      </Link>
+    <div className='container mx-auto' >  
 
       <form ref={formRef} onSubmit={handleSubmit} className="mt-4 w-full space-y-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Basic Info Section */}
         <div className="flex flex-col gap-8 mx-4">
-          <div className=' p-4 border border-card space-y-4'>
+          <div className='space-y-4'>
             {/* Title */}
             <div className='items-center gap-2'> 
               <input
@@ -373,13 +365,9 @@ export default function RecipeSettings({ recipeId, editMode = false }: Props) {
         </div> 
       </form>
 
-      <div className='flex items-center justify-end px-4 py-4'>
-        { editMode && recipeId && (
-          <button className='text-red-500 px-4 py-2 rounded-md' onClick={handleDelete}>
-            Delete Recipe
-          </button> 
-        )}
-         <button
+      <div className='flex items-center justify-center px-4 py-4'>
+        <div className='flex flex-col items-center gap-2'>
+        <button
           type="button"
           onClick={handleNavSubmit}
           disabled={isSubmitting}
@@ -389,6 +377,12 @@ export default function RecipeSettings({ recipeId, editMode = false }: Props) {
             ? (recipeId ? 'Updating...' : 'Creating...')
             : (recipeId ? 'Update Recipe' : 'Create Recipe')}
         </button>
+        { editMode && recipeId && (
+          <button className='text-red-500 px-4 py-2 rounded-md' onClick={handleDelete}>
+            Delete Recipe
+          </button> 
+        )}  
+        </div>
       </div>
       
     </div>

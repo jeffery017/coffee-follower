@@ -41,7 +41,7 @@ export default function RecipeList() {
         <div className="container mx-auto px-4 py-8">
             {/* Header with Create Button */}
             <div className="flex items-center justify-between mb-8">
-                <h1 className="text-3xl font-bold">Coffee Follower</h1>
+                <h1 className="text-3xl">Recipes</h1>
                 <Link 
                     href="/recipes/create"
                     className="flex items-center px-4 py-2 text-sm font-medium shadow-sm text-white border bg-primary hover:bg-primary/80"
