@@ -54,7 +54,7 @@ export default function TagInput({ tags = [], onChange, editMode = true, placeho
           onChange={(e) => setInputValue(e.target.value.toUpperCase())}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
-          className="flex-1 min-w-[120px] bg-transparent border-none outline-none text-sm uppercase"
+          className="flex-1 min-w-[120px] bg-transparent border-none outline-none text-sm uppercase placeholder:text-primary/15"
         />
       )}
     </div>

@@ -190,52 +190,70 @@ export default function RecipeSettings({ recipeId, editMode = false }: Props) {
       <form ref={formRef} onSubmit={handleSubmit} className="mt-4 w-full space-y-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Basic Info Section */}
         <div className="flex flex-col gap-8 mx-4">
-          <div className='space-y-4'>
+          <div className=' p-4 border border-card space-y-4'>
             {/* Title */}
-            <div className='items-center gap-2 '>
-              <label htmlFor="title" className="block text-sm font-medium text-secondary">
-                Title:
-              </label>
+            <div className='items-center gap-2'> 
               <input
                 type="text"
                 name="title"
                 id="title" 
                 required
-                className="form-input border-b border-border text-3xl md:text-6xl uppercase placeholder:text-primary/15"
+                className="form-input text-3xl md:text-4xl uppercase placeholder:text-primary/15"
                 defaultValue={recipe?.title || ""}
                 placeholder="recipe title"
                 onChange={(e) => e.target.value = e.target.value.toUpperCase()}
               />
-            </div>
+
             {/* Subtitle */}
-            <div className='items-center gap-2'> 
-              <label htmlFor="subtitle" className="block text-sm font-medium text-secondary">
-                Subtitle:
-              </label>
-              <input
+            <input
                 type="text"
                 name="subtitle"
                 id="subtitle"
-                className="form-input border-b border-border text-xl placeholder:text-primary/15"
+                className="form-input text-xl placeholder:text-primary/15"
                 defaultValue={recipe?.subtitle || ""}
-                placeholder="A coffee recipe"
+                placeholder="recipe subtitle"
               />
-            </div> 
+            </div>
             {/* Description */}
-            <div className='items-center gap-2'>
-              <label htmlFor="introduction" className="block text-sm font-medium text-secondary">
-                Introduction:
-              </label>
+            <div className='items-center gap-2'> 
               <textarea
                 ref={descriptionRef}
                 name="introduction"
                 id="introduction"
                 rows={1}
-                className="form-input border-b border-border resize-none overflow-hidden"
+                className="form-input resize-none overflow-hidden placeholder:text-primary/15 border-b border-border"
                 defaultValue={recipe?.introduction || ""}
+                placeholder="Add introduction..."
                 onInput={(e) => adjustTextareaHeight(e.currentTarget)}
               />
             </div> 
+              {/* Flavors Section */}
+              <div className='border-b pb-2 border-border'>
+                <TagInput
+                  tags={recipe?.flavors || []}
+                  placeholder="Add flavor..."
+                  onChange={(newFlavors) => {
+                    if (recipe) {
+                      setRecipe({
+                        ...recipe,
+                        flavors: newFlavors
+                      });
+                    }
+                  }}
+                  editMode={editMode}
+                /> 
+
+              </div>
+            {/* Tags Section */}
+            <div className='border-b pb-2 border-border'>
+                <TagInput
+                  tags={recipe?.tags || []}
+                  onChange={handleTagsChange}
+                  editMode={editMode}
+              /> 
+                
+            </div>
+            
           </div> 
           
 
@@ -301,41 +319,7 @@ export default function RecipeSettings({ recipeId, editMode = false }: Props) {
             
             
           </div>
-
-
-          <div className='space-y-4'>
-            <h1 className='text-xl text-center'>Tags</h1>
-              {/* Flavors Section */}
-            <div className='space-y-2 border-b pb-2 border-border'>
-              <label htmlFor="flavors" className="block text-sm font-medium text-secondary">
-                Flavors:
-              </label>
-              <TagInput
-                tags={recipe?.flavors || []}
-                placeholder="Add flavor..."
-                onChange={(newFlavors) => {
-                  if (recipe) {
-                    setRecipe({
-                      ...recipe,
-                      flavors: newFlavors
-                    });
-                  }
-                }}
-                editMode={editMode}
-              />
-            </div>
-            {/* Tags Section */}
-            <div className='space-y-2 border-b pb-2 border-border'>
-              <label htmlFor="tags" className="block text-sm font-medium text-secondary">
-                Hashtag:
-              </label>
-              <TagInput
-                tags={recipe?.tags || []}
-                onChange={handleTagsChange}
-                editMode={editMode}
-              />
-            </div>
-          </div>  
+ 
         </div>
 
         
