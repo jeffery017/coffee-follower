@@ -1,3 +1,4 @@
+import { Timestamp } from 'firebase/firestore';
 import { z } from 'zod';
 
 export const RECIPE_COLLECTION_NAME = "recipes";
@@ -15,24 +16,23 @@ export const preparationSchema = z.object({
 
 export enum stepActionType {
   CENTER_POURING = "CENTER_POURING",
-  SIDE_POURING = "SIDE_POURING",
+  CIRCLE_POURING = "CIRCLE_POURING",
   STIRRING = "STIRRING",
   WAITING = "WAITING",
 }
 
-// Schema for recipe steps
+// Schema for recipe actions
 export const actionSchema = z.object({ 
   action: z.nativeEnum(stepActionType).optional(),
-  duration: z.number().min(0, "Duration cannot be negative").optional(),
-  instruction: z.string().optional(),
-  imageUrl: z.string().url().optional(),
-  targetQuantity: z.number().positive("Target quantity must be positive").optional(),
+  targetTime: z.number().min(0, "Target time cannot be negative").optional(),
+  targetGram: z.number().positive("Target quantity must be positive").optional(),
 });
 
-const stepSchema = z.object({
-  title: z.string().optional(),
-  description: z.string().optional(),
-  actions: z.array(actionSchema).min(1, "At least one action is required"),
+// Schema for recipe steps
+export const stepSchema = z.object({
+  name: z.string().min(1, "Step name is required"),
+  actions: z.array(actionSchema).min(1, "At least one action is required"), 
+  instruction: z.string().optional(),
 });
 
 // Main recipe schema
@@ -45,8 +45,8 @@ export const recipeSchema = z.object({
   roast: z.nativeEnum(Roast).optional(),
   dripper: z.string().optional(),
   tags: z.array(z.string()).optional(),
-  createdAt: z.date(),
-  updatedAt: z.date(),
+  createdAt: z.instanceof(Timestamp).optional(),
+  updatedAt: z.instanceof(Timestamp).optional(),
   preparation: preparationSchema,
   steps: z.array(stepSchema).min(1, "At least one step is required"),
 });
@@ -54,6 +54,6 @@ export const recipeSchema = z.object({
 // Types inferred from schemas
 export type Recipe = z.infer<typeof recipeSchema>;
 export type Preparation = z.infer<typeof preparationSchema>;
-export type Step = z.infer<typeof stepSchema>;
 export type RecipeAction = z.infer<typeof actionSchema>;
+export type RecipeStep = z.infer<typeof stepSchema>;
 

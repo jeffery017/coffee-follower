@@ -1,12 +1,12 @@
 import { Recipe } from '@/utils/schemas/Recipe';
 
-interface RecipeCardProps {
+interface Props {
   recipe: Recipe;
 }
 
-export default function RecipeCard({ recipe }: RecipeCardProps) {
+export default function RecipeCardEntity({ recipe }: Props) {
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow">
+    <div className="bg-card rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow">
       <h3 className="text-lg font-medium text-gray-900">{recipe.title}</h3>
       {recipe.subtitle && (
         <p className="text-sm text-gray-500 mt-1">{recipe.subtitle}</p>
@@ -35,7 +35,7 @@ export default function RecipeCard({ recipe }: RecipeCardProps) {
         ))}
       </div>
       <div className="mt-4 text-xs text-gray-500">
-        {new Date(recipe.createdAt).toLocaleDateString()}
+        {recipe.createdAt ? new Date(recipe.createdAt.toDate()).toLocaleDateString() : ''}
       </div>
     </div>
   );

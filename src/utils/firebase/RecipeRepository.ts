@@ -1,4 +1,4 @@
-import { CollectionReference, DocumentSnapshot, Firestore, addDoc, collection, deleteDoc, doc, getDoc, getDocs, limit, orderBy, query, startAfter, updateDoc } from "firebase/firestore";
+import { CollectionReference, DocumentSnapshot, Firestore, Timestamp, addDoc, collection, deleteDoc, doc, getDoc, getDocs, limit, orderBy, query, startAfter, updateDoc } from "firebase/firestore";
 import { Recipe } from "../schemas/Recipe";
 import { firestore } from "./app";
 
@@ -21,6 +21,8 @@ export class RecipeRepository {
   // CRUD operations
   async create(recipe: Recipe): Promise<string> { 
     try {
+      recipe.createdAt = Timestamp.fromDate(new Date());
+      recipe.updatedAt = Timestamp.fromDate(new Date());
       const docRef = await addDoc(this.recipesCollection, recipe);
       return docRef.id;
     } catch (error) {
@@ -34,11 +36,12 @@ export class RecipeRepository {
       throw new Error("Recipe has no ID");
     }
     try {
+      recipe.updatedAt = Timestamp.fromDate(new Date());
       const docRef = doc(this.recipesCollection, recipe.id);
       if (!docRef) {
         throw new Error(`Recipe ${recipe.title} with id ${recipe.id} not found`);
       }
-      await updateDoc(docRef, recipe);
+      await updateDoc(docRef, removeUndefined(recipe));
     } catch (error) {
       console.error(`Error updating recipe with id ${recipe.id}:`, error);
       throw error;
@@ -123,4 +126,19 @@ export class RecipeRepository {
       throw error;
     }
   }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function removeUndefined(obj: any): any {
+  if (Array.isArray(obj)) {
+    return obj.map(removeUndefined);
+  } else if (obj && typeof obj === 'object') {
+    return Object.fromEntries(
+      Object.entries(obj)
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        .filter(([_, v]) => v !== undefined)
+        .map(([k, v]) => [k, removeUndefined(v)])
+    );
+  }
+  return obj;
 } 

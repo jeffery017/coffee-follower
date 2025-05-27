@@ -2,25 +2,76 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --primary: #171717;
+  --secondary: #3b3b3b; 
+  --placeholder: #919191;
+  --card: #bfbfbf; 
+  --border: #8a8a8a;
 }
 
 @theme inline {
   --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-secondary: var(--secondary);
+  --color-card: var(--card);
+  --color-border: var(--border);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #0a0a0a; 
+    --primary: #ededed;
+    --secondary: #c7c7c7; 
+    --placeholder: #c7c7c7;
+    --card: #373737; 
+    --border: #919191;
   }
 }
 
 body {
   background: var(--background);
-  color: var(--foreground);
+  color: var(--primary);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+.form-input {
+  @apply py-1 block w-full outline-none focus:border-border;
+}
+
+/* Remove default Safari select styling */
+select.form-input {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 0.5rem center;
+  background-size: 1.5em 1.5em;
+  padding-right: 2.5rem; 
+} 
+
+/* Remove the arrow in IE */
+select.form-input::-ms-expand {
+  display: none;
+}
+
+/* Remove number input spinners for .form-input */
+input[type="number"].form-input::-webkit-outer-spin-button,
+input[type="number"].form-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"].form-input {
+  -moz-appearance: textfield;
+}
+
+select {
+  /* Remove default arrow in most browsers */
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background: none;
+  background-image: none !important;
 }

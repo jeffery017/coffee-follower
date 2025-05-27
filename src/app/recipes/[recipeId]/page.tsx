@@ -1,3 +1,4 @@
+import RecipeSettings from "@/components/RecipeDetail/RecipeForm";
 import { RecipeRepository } from "@/utils/firebase/RecipeRepository";
 
 type Props = {
@@ -8,10 +9,10 @@ export default async function Page({ params }: Props) {
     const { recipeId } = await params;
     const recipeRepository = new RecipeRepository();
     const recipe = await recipeRepository.get(recipeId);
+    if (!recipe) {
+        return <div>Recipe not found</div>;
+    }
     return (
-        <div>
-            <h1>{recipe?.title}</h1>
-            <h2>{recipe?.subtitle}</h2>
-        </div>
+        <RecipeSettings recipeId={recipeId} editMode={true} />
     );
 }
