@@ -1,25 +1,20 @@
-interface Props {
-  onClick: () => void;
+interface Props { 
   size?: number | string; // Accepts a number (pixels) or a string (e.g. '2rem', '24px')
   className?: string;
 }
 
-export default function PlusButton({ onClick, size = 16, className }: Props) {
+export default function PlusButton({ size = 16, className }: Props) {
   const style = {
     width: typeof size === 'number' ? `${size}px` : size,
     height: typeof size === 'number' ? `${size}px` : size,
   };
   const iconSize = typeof size === 'number' ? size * 0.6 : '60%';
-
-  const handleClick = () => {
-    onClick();
-  };
+ 
 
   return (
     <div
       className={`shrink-0 flex items-center justify-center border border-background rounded-full ${className}`}
-      style={style}
-      onClick={handleClick}
+      style={style} 
     >
       <svg
         width={iconSize}

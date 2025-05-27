@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
  
 
 interface Props {
-  action: RecipeAction;
+  action: RecipeAction; 
   onUpdate: (action: RecipeAction) => void;
   onRemove: () => void; 
   editMode: boolean;
@@ -90,31 +90,33 @@ export default function RecipeActionForm({ action, onUpdate, onRemove, editMode 
 
   return (
     <> 
-      <div className="border-r border-primary flex items-center justify-start text-background placeholder:text-background/50 gap-4"> 
-      {/* Remove Action */}
-        <MinusButton onClick={onRemove} />
-        {/* Action */}
+      <div className="col-span-6 border-r border-primary flex items-center justify-start text-background placeholder:text-background/50 gap-4"> 
         {editMode ? (
-          <select 
-          value={localAction.action ?? ''} 
-            className="text-background text-center w-full rounded-full mr-2 md:mr-8"
-            onChange={handleActionChange}
-          >
-            <option value="">[Select action]</option>
-            {Object.entries(actionTypeDisplayNames).map(([actionType, displayName]) => (
-              <option key={actionType} value={actionType}>
-                {displayName}
-              </option>
-            ))}
-          </select>
+          <>
+            <div>
+              <button type="button" onClick={onRemove}>
+                <MinusButton /> 
+              </button>
+            </div> 
+            <select 
+              value={localAction.action ?? ''} 
+              className="text-background text-center w-full mr-2 md:mr-8 outline-none focus:outline-none focus:ring-0 focus:border-none"
+              onChange={handleActionChange}
+            >
+              {Object.entries(actionTypeDisplayNames).map(([actionType, displayName]) => (
+                <option key={actionType} value={actionType}>
+                  {displayName}
+                </option>
+              ))}
+            </select>
+          </>
         ) : (
           <div>{actionTypeDisplayNames[action.action as stepActionType] || '-'}</div>
         )}
       </div>
-      {/* Target Time */}
-      <div className="border-r border-primary text-background"> 
+      <div className="col-span-3 border-r border-primary text-background"> 
         {editMode ? (
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 ml-2">
             <input
               type="number"
               min="0"
@@ -145,32 +147,27 @@ export default function RecipeActionForm({ action, onUpdate, onRemove, editMode 
           </div>
         )}
       </div> 
-      {/* Target Gram */}
-      <div className="flex items-center justify-center">
-        { isPourAction && (
-        <div className="flex items-center gap-1 w-10 text-background placeholder:text-background/50">
-            
+      <div className="col-span-3 flex items-center justify-center">
+        {isPourAction && (
+          <div className="flex items-center gap-1 w-10 text-background placeholder:text-background/50">
             {editMode ? (
-                <input
-                  type="number"
-                  value={gramInput}
-                  onChange={handleGramChange}
-                  onBlur={handleGramBlur}
-                  className="form-input text-end "
-                  min="0"
-                  max="999"
-                  step="1"
-                  placeholder="___"
-                />
-              ) : (
-                <div className="text-primary">{localAction.targetGram ?? '-'}</div>
-              )}
-              <span>g</span>
-
-
-        </div>
-          )
-        }
+              <input
+                type="number"
+                value={gramInput}
+                onChange={handleGramChange}
+                onBlur={handleGramBlur}
+                className="form-input text-end"
+                min="0"
+                max="999"
+                step="1"
+                placeholder="___"
+              />
+            ) : (
+              <div className="text-primary">{localAction.targetGram ?? '-'}</div>
+            )}
+            <span>g</span>
+          </div>
+        )}
       </div>
     </>
   );

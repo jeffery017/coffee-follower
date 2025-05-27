@@ -1,23 +1,27 @@
-import { Recipe } from '@/utils/schemas/Recipe';
+import { Recipe, Roast } from '@/utils/schemas/Recipe';
 
 interface Props {
   recipe: Recipe;
 }
 
+const RoastDisplayNames = {
+  [Roast.LIGHT]: 'Light Roast',
+  [Roast.MEDIUM]: 'Medium Roast',
+  [Roast.DARK]: 'Dark Roast',
+}
+
 export default function RecipeCardEntity({ recipe }: Props) {
   return (
-    <div className="bg-card rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow">
+    <div className="max-w-64 aspect-square flex flex-col justify-between bg-card shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow">
       <h3 className="text-lg font-medium text-gray-900">{recipe.title}</h3>
       {recipe.subtitle && (
         <p className="text-sm text-gray-500 mt-1">{recipe.subtitle}</p>
-      )}
-      {recipe.description && (
-        <p className="text-sm text-gray-600 mt-2">{recipe.description}</p>
-      )}
+      )} 
+      <div className='grow'></div>
       <div className="mt-4 flex flex-wrap gap-2">
         {recipe.roast && (
           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-            {recipe.roast}
+            {RoastDisplayNames[recipe.roast]}
           </span>
         )}
         {recipe.dripper && (
@@ -33,9 +37,6 @@ export default function RecipeCardEntity({ recipe }: Props) {
             {tag}
           </span>
         ))}
-      </div>
-      <div className="mt-4 text-xs text-gray-500">
-        {recipe.createdAt ? new Date(recipe.createdAt.toDate()).toLocaleDateString() : ''}
       </div>
     </div>
   );

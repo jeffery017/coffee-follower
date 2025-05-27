@@ -37,7 +37,7 @@ body {
 }
 
 .form-input {
-  @apply py-1 block w-full outline-none focus:border-border;
+  @apply py-1 block w-full outline-none;
 }
 
 /* Remove default Safari select styling */

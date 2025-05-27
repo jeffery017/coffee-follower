@@ -2,10 +2,13 @@
 
 import { RecipeRepository } from '@/utils/firebase/RecipeRepository';
 import { Recipe, recipeSchema, RecipeStep, Roast } from '@/utils/schemas/Recipe';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import PlusButton from '../common/PlusButton';
+import FormField from './components/FormField';
 import RecipeStepEntity from './components/RecipeStepEntity';
+import TagInput from './components/TagInput';
 
 
 interface Props {
@@ -19,6 +22,14 @@ export default function RecipeSettings({ recipeId, editMode = false }: Props) {
   const [steps, setSteps] = useState<RecipeStep[]>([ ]);
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [loading, setLoading] = useState(!!recipeId);
+  const descriptionRef = useRef<HTMLTextAreaElement>(null);
+  const preparationRef = useRef<HTMLTextAreaElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
+
+  const adjustTextareaHeight = (element: HTMLTextAreaElement) => {
+    element.style.height = 'auto';
+    element.style.height = `${element.scrollHeight}px`;
+  };
 
   useEffect(() => {
     if (recipeId) {
@@ -36,17 +47,26 @@ export default function RecipeSettings({ recipeId, editMode = false }: Props) {
         {
           name: "Step 1",
           instruction: "",
-          actions: [{}]
+          actions: []
         }
       ]);
     }
   }, [recipeId]);
 
+  useEffect(() => {
+    if (descriptionRef.current) {
+      adjustTextareaHeight(descriptionRef.current);
+    }
+    if (preparationRef.current) {
+      adjustTextareaHeight(preparationRef.current);
+    }
+  }, [recipe?.introduction, recipe?.preparation?.notes]);
+
   const addStep = () => {
     const newStep: RecipeStep = {
       name: `Step ${steps.length + 1}`,
       instruction: "",
-      actions: [{}]
+      actions: []
     };
     setSteps([...steps, newStep]);
   };
@@ -75,10 +95,17 @@ export default function RecipeSettings({ recipeId, editMode = false }: Props) {
         uid: 'user123', // TODO: Replace with actual user ID
         title: formData.get('title') as string,
         subtitle: formData.get('subtitle') as string || '',
-        description: formData.get('description') as string || '',
-        roast: formData.get('roast') ? Roast[formData.get('roast') as keyof typeof Roast] : undefined,
+        introduction: formData.get('introduction') as string || '',
+        roast: formData.get('roast') as Roast || undefined,
         dripper: formData.get('dripper') as string || '',
-        preparation: { notes: '' },
+        filter: formData.get('filter') as string || '',
+        grindSize: formData.get('grindSize') as string || '',
+        temperature: formData.get('temperature') ? Number(formData.get('temperature')) : undefined,
+        coffeeWeight: formData.get('coffeeWeight') ? Number(formData.get('coffeeWeight')) : undefined,
+        waterWeight: formData.get('waterWeight') ? Number(formData.get('waterWeight')) : undefined,
+        tags: recipe?.tags || [],
+        flavors: recipe?.flavors || [],
+        preparation: { notes: formData.get('preparation.notes') as string || '' },
         steps: steps.map(step => ({
           name: step.name,
           instruction: step.instruction || '',
@@ -108,6 +135,10 @@ export default function RecipeSettings({ recipeId, editMode = false }: Props) {
     }
   };
 
+  const handleNavSubmit = () => {
+    formRef.current?.requestSubmit();
+  };
+
   const handleDelete = async () => {
     if (!recipe?.id) return;
     if (!window.confirm('Are you sure you want to delete this recipe?')) return;
@@ -121,17 +152,26 @@ export default function RecipeSettings({ recipeId, editMode = false }: Props) {
     }
   };
 
-  const submitButton = (
-    <button
-      type="submit"
-      disabled={isSubmitting}
-      className="justify-center rounded-md bg-primary py-2 px-4 text-sm font-medium text-background shadow-sm  disabled:opacity-50"
-    >
-      {isSubmitting
-        ? (recipeId ? 'Updating...' : 'Creating...')
-        : (recipeId ? 'Update Recipe' : 'Create Recipe')}
-    </button>
-  )
+  const handleTagsChange = (newTags: string[]) => {
+    if (recipe) {
+      setRecipe({
+        ...recipe,
+        tags: newTags
+      });
+    } else {
+      // For new recipes
+      setRecipe({
+        id: '',
+        uid: 'user123',
+        title: '',
+        subtitle: '',
+        introduction: '',
+        preparation: { notes: '' },
+        steps: steps,
+        tags: newTags
+      });
+    }
+  };
 
   if (loading) {
     return <div className='w-full h-full flex items-center justify-center'>Loading...</div>;
@@ -139,95 +179,190 @@ export default function RecipeSettings({ recipeId, editMode = false }: Props) {
 
   return (
     <div className='container mx-auto' > 
-      <div className='flex items-center justify-between px-4 py-4'>
-      {/* Title */}
-        <h2 className="text-xl font-semibold">Recipe Information</h2>
-        {/* Save Recipe Button */}
-        {submitButton}
-      </div>
+      <Link href="/recipes" 
+        className='mt-2'
+      >
+        {/* Title */}
+        <h2 className="text-xl font-semibold">Recipe Follower</h2>
+        {/* Save Recipe Button */} 
+      </Link>
 
-      <form onSubmit={handleSubmit} className="mt-4 w-full space-y-8 grid grid-cols-1 lg:grid-cols-2">
-        
+      <form ref={formRef} onSubmit={handleSubmit} className="mt-4 w-full space-y-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Basic Info Section */}
-        <div className="space-y-4 mx-4">
-          <div className='items-center gap-2 '>
-            <label htmlFor="title" className="block text-sm font-medium text-secondary">
-              Title:
-            </label>
-            <input
-              type="text"
-              name="title"
-              id="title"
-              required
-              className="form-input border-b border-border"
-              defaultValue={recipe?.title || ""}
-            />
-          </div>
+        <div className="flex flex-col gap-8 mx-4">
+          <div className='space-y-4'>
+            {/* Title */}
+            <div className='items-center gap-2 '>
+              <label htmlFor="title" className="block text-sm font-medium text-secondary">
+                Title:
+              </label>
+              <input
+                type="text"
+                name="title"
+                id="title" 
+                required
+                className="form-input border-b border-border text-3xl md:text-6xl uppercase placeholder:text-primary/15"
+                defaultValue={recipe?.title || ""}
+                placeholder="recipe title"
+                onChange={(e) => e.target.value = e.target.value.toUpperCase()}
+              />
+            </div>
+            {/* Subtitle */}
+            <div className='items-center gap-2'> 
+              <label htmlFor="subtitle" className="block text-sm font-medium text-secondary">
+                Subtitle:
+              </label>
+              <input
+                type="text"
+                name="subtitle"
+                id="subtitle"
+                className="form-input border-b border-border text-xl placeholder:text-primary/15"
+                defaultValue={recipe?.subtitle || ""}
+                placeholder="A coffee recipe"
+              />
+            </div> 
+            {/* Description */}
+            <div className='items-center gap-2'>
+              <label htmlFor="introduction" className="block text-sm font-medium text-secondary">
+                Introduction:
+              </label>
+              <textarea
+                ref={descriptionRef}
+                name="introduction"
+                id="introduction"
+                rows={1}
+                className="form-input border-b border-border resize-none overflow-hidden"
+                defaultValue={recipe?.introduction || ""}
+                onInput={(e) => adjustTextareaHeight(e.currentTarget)}
+              />
+            </div> 
+          </div> 
+          
 
-          <div className='items-center gap-2'>
-            <label htmlFor="subtitle" className="block text-sm font-medium text-secondary">
-              Subtitle:
-            </label>
-            <input
-              type="text"
-              name="subtitle"
-              id="subtitle"
-              className="form-input border-b border-border"
-              defaultValue={recipe?.subtitle || ""}
+          {/* Brewing Properties */}
+          <h1 className='text-xl text-center'>Brewing Properties</h1>
+          <div className='grid grid-cols-2 gap-4'>
+            <FormField
+              label="Coffee Weight (g)"
+              name="coffeeWeight"
+              id="coffeeWeight"
+              type="number"
+              required={true}
+              defaultValue={recipe?.coffeeWeight?.toString() || ""}
             />
-          </div>
-
-          <div className='items-center gap-2'>
-            <label htmlFor="description" className="block text-sm font-medium text-secondary">
-              Description:
-            </label>
-            <textarea
-              name="description"
-              id="description"
-              rows={3}
-              className="form-input border border-border"
-              defaultValue={recipe?.description || ""}
+            <FormField
+              label="Water Weight (g)"
+              name="waterWeight"
+              id="waterWeight"
+              type="number"
+              required={true}
+              defaultValue={recipe?.waterWeight?.toString() || ""}
+            />  
+            <FormField
+              label="Temperature (°C)"
+              name="temperature"
+              id="temperature"
+              required={true}
+              type="number"
+              defaultValue={recipe?.temperature?.toString() || ""}
             />
-          </div>
-
-          <div className='flex items-center gap-2'>
-            <label htmlFor="roast" className="block text-sm font-medium text-secondary whitespace-nowrap">
-              Roast Level:
-            </label>
-            <select
+            <FormField
+              label="Roast Level"
               name="roast"
               id="roast"
-              className="form-input"
-              defaultValue={recipe?.roast ? Object.keys(Roast).find(key => Roast[key as keyof typeof Roast] === recipe.roast) : ""}
-            >
-              <option value="">[Select Roast Level]</option>
-              {Object.entries(Roast)
+              type="select"
+              required={true}
+              options={Object.entries(Roast)
                 .filter(([key]) => isNaN(Number(key)))
-                .map(([key]) => (
-                  <option key={key} value={key}>
-                    {key}
-                  </option>
-                ))}
-            </select>
-          </div>
-
-          <div>
-            <label htmlFor="dripper" className="block text-sm font-medium text-secondary whitespace-nowrap">
-              Dripper:
-            </label>
-            <input
-              type="text"
+                .map(([key]) => ({ value: key, label: key }))}
+              defaultValue={recipe?.roast ? Object.keys(Roast).find(key => Roast[key as keyof typeof Roast] === recipe.roast) : ""}
+            />
+            <FormField
+              label="Grind Size"
+              name="grindSize"
+              id="grindSize"
+              placeholder='Optional'
+              defaultValue={recipe?.grindSize || ""}
+            />
+            <FormField
+              label="Dripper"
               name="dripper"
               id="dripper"
-              className="form-input border-b border-border"
               defaultValue={recipe?.dripper || ""}
+              placeholder='Optional'
             />
+            <FormField
+              label="Filter"
+              name="filter"
+              id="filter"
+              defaultValue={recipe?.filter || ""}
+              placeholder='Optional'
+            />
+            
+            
           </div>
+
+
+          <div className='space-y-4'>
+            <h1 className='text-xl text-center'>Tags</h1>
+              {/* Flavors Section */}
+            <div className='space-y-2 border-b pb-2 border-border'>
+              <label htmlFor="flavors" className="block text-sm font-medium text-secondary">
+                Flavors:
+              </label>
+              <TagInput
+                tags={recipe?.flavors || []}
+                placeholder="Add flavor..."
+                onChange={(newFlavors) => {
+                  if (recipe) {
+                    setRecipe({
+                      ...recipe,
+                      flavors: newFlavors
+                    });
+                  }
+                }}
+                editMode={editMode}
+              />
+            </div>
+            {/* Tags Section */}
+            <div className='space-y-2 border-b pb-2 border-border'>
+              <label htmlFor="tags" className="block text-sm font-medium text-secondary">
+                Hashtag:
+              </label>
+              <TagInput
+                tags={recipe?.tags || []}
+                onChange={handleTagsChange}
+                editMode={editMode}
+              />
+            </div>
+          </div>  
         </div>
 
+        
+
+
+        
+
         {/* Steps Section */}
-        <div className="space-y-4 grow w-full lg:overflow-y-scroll lg:h-[calc(100dvh-6rem)] lg:pr-4"> 
-          <h2 className="text-xl font-semibold px-4">Brewing Steps</h2>
+        <div className="flex flex-col gap-4 grow w-full lg:overflow-y-scroll lg:h-[calc(100dvh-6rem)] lg:pr-4"> 
+          <h2 className="text-xl text-center px-4">Brewing Steps</h2>
+          <div className="space-y-4">
+            <div className='items-center gap-2 bg-card/70 p-4'>
+              <label htmlFor="preparation" className="block text-sm font-medium text-secondary">
+                Preparation Notes
+              </label>
+              <textarea
+                ref={preparationRef}
+                name="preparation.notes"
+                id="preparation"
+                rows={1}
+                className="form-input border-b border-primary resize-none overflow-hidden text-background placeholder:text-background/80"
+                defaultValue={recipe?.preparation?.notes || ""}
+                placeholder="Add notes..."
+                onInput={(e) => adjustTextareaHeight(e.currentTarget)}
+              />
+            </div>
+          </div>
 
           <div className="space-y-4">
             <div className="flex flex-col">
@@ -241,13 +376,13 @@ export default function RecipeSettings({ recipeId, editMode = false }: Props) {
                   editMode={editMode}
                 />
               ))}
-              <div className={`w-full flex items-center justify-center text-background p-4 ${steps.length%2 === 0 ? 'bg-card' : 'bg-card/70'}`}>
+              <div className={`flex items-center justify-center text-background p-4 ${steps.length%2 === 0 ? 'bg-card' : 'bg-card/70'}`}>
                 {editMode && (
-                  <PlusButton 
-                    onClick={addStep}
-                    size={32}
-                    /> 
-                  )}
+                  <button type="button" onClick={addStep} className='flex items-center gap-2'>
+                    <PlusButton size={32} /> 
+                    <span className=''>Add Step</span>
+                  </button>
+                )}
               </div>
             </div>
           </div>
@@ -255,9 +390,21 @@ export default function RecipeSettings({ recipeId, editMode = false }: Props) {
       </form>
 
       <div className='flex items-center justify-end px-4 py-4'>
-        <button className='bg-red-500 text-background px-4 py-2 rounded-md' onClick={handleDelete}>
-          Delete Recipe
-        </button> 
+        { editMode && recipeId && (
+          <button className='text-red-500 px-4 py-2 rounded-md' onClick={handleDelete}>
+            Delete Recipe
+          </button> 
+        )}
+         <button
+          type="button"
+          onClick={handleNavSubmit}
+          disabled={isSubmitting}
+          className="justify-center bg-primary hover:bg-primary/80 py-2 px-4 text-sm font-medium text-background shadow-sm disabled:opacity-50"
+        >
+          {isSubmitting
+            ? (recipeId ? 'Updating...' : 'Creating...')
+            : (recipeId ? 'Update Recipe' : 'Create Recipe')}
+        </button>
       </div>
       
     </div>

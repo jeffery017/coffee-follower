@@ -4,10 +4,11 @@ import { z } from 'zod';
 export const RECIPE_COLLECTION_NAME = "recipes";
 
 export enum Roast {
-  "LIGHT",
-  "MEDIUM",
-  "DARK",
+  LIGHT = "LIGHT",
+  MEDIUM = "MEDIUM",
+  DARK = "DARK",
 }
+
 
 // Schema for preparation details
 export const preparationSchema = z.object({ 
@@ -39,15 +40,25 @@ export const stepSchema = z.object({
 export const recipeSchema = z.object({
   id: z.string().optional(),
   uid: z.string().min(1, "Author is required"),
-  title: z.string().min(1, "Title is required"),
-  subtitle: z.string().optional(),
-  description: z.string().optional(),
-  roast: z.nativeEnum(Roast).optional(),
-  dripper: z.string().optional(),
-  tags: z.array(z.string()).optional(),
   createdAt: z.instanceof(Timestamp).optional(),
   updatedAt: z.instanceof(Timestamp).optional(),
+  title: z.string().min(1, "Title is required"),
+  subtitle: z.string().optional(),
+  introduction: z.string().optional(),
   preparation: preparationSchema,
+  // Properties
+  temperature: z.number().positive("Temperature must be positive").optional(),
+  time: z.number().positive("Time must be positive").optional(),
+  coffeeWeight: z.number().positive("Coffee weight must be positive").optional(),
+  waterWeight: z.number().positive("Water weight must be positive").optional(),
+  coffeeToWaterRatio: z.number().positive("Coffee to water ratio must be positive").optional(),
+  roast: z.nativeEnum(Roast).optional(),
+  grindSize: z.string().optional(),
+  dripper: z.string().optional(),
+  filter: z.string().optional(),
+  // Tags
+  tags: z.array(z.string()).optional(),
+  flavors: z.array(z.string()).optional(),
   steps: z.array(stepSchema).min(1, "At least one step is required"),
 });
 

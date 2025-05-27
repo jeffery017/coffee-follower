@@ -1,10 +1,9 @@
-interface Props {
-  onClick: () => void;
+interface Props { 
   size?: number | string; // Accepts a number (pixels) or a string (e.g. '2rem', '24px')
   className?: string;
 }
 
-export default function MinusButton({ onClick, size = 16, className }: Props) {
+export default function MinusButton({  size = 16, className }: Props) {
   const style = {
     width: typeof size === 'number' ? `${size}px` : size,
     height: typeof size === 'number' ? `${size}px` : size,
@@ -14,8 +13,7 @@ export default function MinusButton({ onClick, size = 16, className }: Props) {
   return (
     <div
       className={`shrink-0 flex items-center justify-center border border-background rounded-full ${className}`}
-      style={style}
-      onClick={onClick}
+      style={style} 
     >
       <svg
         width={iconSize}
