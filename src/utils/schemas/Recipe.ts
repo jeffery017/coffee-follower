@@ -56,8 +56,7 @@ export const recipeSchema = z.object({
   grindSize: z.string().optional(),
   dripper: z.string().optional(),
   filter: z.string().optional(),
-  // Tags
-  tags: z.array(z.string()).optional(),
+  // Tags 
   flavors: z.array(z.string()).optional(),
   steps: z.array(stepSchema).min(1, "At least one step is required"),
 });

@@ -102,7 +102,6 @@ export default function RecipeSettings({ recipeId, editMode = false }: Props) {
         temperature: formData.get('temperature') ? Number(formData.get('temperature')) : undefined,
         coffeeWeight: formData.get('coffeeWeight') ? Number(formData.get('coffeeWeight')) : undefined,
         waterWeight: formData.get('waterWeight') ? Number(formData.get('waterWeight')) : undefined,
-        tags: recipe?.tags || [],
         flavors: recipe?.flavors || [],
         preparation: { notes: formData.get('preparation.notes') as string || '' },
         steps: steps.map(step => ({
@@ -151,11 +150,11 @@ export default function RecipeSettings({ recipeId, editMode = false }: Props) {
     }
   };
 
-  const handleTagsChange = (newTags: string[]) => {
+  const handleFlavorChange = (newTags: string[]) => {
     if (recipe) {
       setRecipe({
         ...recipe,
-        tags: newTags
+        flavors: newTags
       });
     } else {
       // For new recipes
@@ -167,7 +166,7 @@ export default function RecipeSettings({ recipeId, editMode = false }: Props) {
         introduction: '',
         preparation: { notes: '' },
         steps: steps,
-        tags: newTags
+        flavors: newTags
       });
     }
   };
@@ -181,10 +180,10 @@ export default function RecipeSettings({ recipeId, editMode = false }: Props) {
 
       <form ref={formRef} onSubmit={handleSubmit} className="mt-4 w-full space-y-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Basic Info Section */}
-        <div className="flex flex-col gap-8 mx-4">
-          <div className='space-y-4'>
-            {/* Title */}
-            <div className='items-center gap-2'> 
+        <div className="flex flex-col gap-8">
+          <div className='space-y-4 p-4'>
+            {/* Title */} 
+            <div>
               <input
                 type="text"
                 name="title"
@@ -196,8 +195,8 @@ export default function RecipeSettings({ recipeId, editMode = false }: Props) {
                 onChange={(e) => e.target.value = e.target.value.toUpperCase()}
               />
 
-            {/* Subtitle */}
-            <input
+              {/* Subtitle */}
+              <input
                 type="text"
                 name="subtitle"
                 id="subtitle"
@@ -206,8 +205,36 @@ export default function RecipeSettings({ recipeId, editMode = false }: Props) {
                 placeholder="recipe subtitle"
               />
             </div>
+              {/* Flavors Section */}
+              <TagInput
+                tags={recipe?.flavors || []}
+                placeholder="Add flavor..."
+                onChange={handleFlavorChange}
+                editMode={editMode}
+              />  
             {/* Description */}
+            
+              
+              
+            {/* Tags Section */}
+            {/* <div className='border-b pb-2 border-border'>
+                <TagInput
+                  tags={recipe?.tags || []}
+                  onChange={handleTagsChange}
+                  editMode={editMode}
+              /> 
+                
+            </div> */}
+            
+          </div> 
+          
+
+          {/* Brewing Properties */} 
+          <div className='bg-card/30 p-4 space-y-4'>
             <div className='items-center gap-2'> 
+              <label htmlFor="introduction" className="block text-xl font-medium text-primary">
+                Introduction
+              </label>
               <textarea
                 ref={descriptionRef}
                 name="introduction"
@@ -219,97 +246,67 @@ export default function RecipeSettings({ recipeId, editMode = false }: Props) {
                 onInput={(e) => adjustTextareaHeight(e.currentTarget)}
               />
             </div> 
-              {/* Flavors Section */}
-              <div className='border-b pb-2 border-border'>
-                <TagInput
-                  tags={recipe?.flavors || []}
-                  placeholder="Add flavor..."
-                  onChange={(newFlavors) => {
-                    if (recipe) {
-                      setRecipe({
-                        ...recipe,
-                        flavors: newFlavors
-                      });
-                    }
-                  }}
-                  editMode={editMode}
-                /> 
-
-              </div>
-            {/* Tags Section */}
-            <div className='border-b pb-2 border-border'>
-                <TagInput
-                  tags={recipe?.tags || []}
-                  onChange={handleTagsChange}
-                  editMode={editMode}
-              /> 
-                
+            <h1 className='text-xl'>Properties</h1>
+            <div className='grid grid-cols-2 gap-4'>
+              <FormField
+                label="Coffee Weight (g)"
+                name="coffeeWeight"
+                id="coffeeWeight"
+                type="number"
+                required={true}
+                defaultValue={recipe?.coffeeWeight?.toString() || ""}
+              />
+              <FormField
+                label="Water Weight (g)"
+                name="waterWeight"
+                id="waterWeight"
+                type="number"
+                required={true}
+                defaultValue={recipe?.waterWeight?.toString() || ""}
+              />  
+              <FormField
+                label="Temperature (°C)"
+                name="temperature"
+                id="temperature"
+                required={true}
+                type="number"
+                defaultValue={recipe?.temperature?.toString() || ""}
+              />
+              <FormField
+                label="Roast Level"
+                name="roast"
+                id="roast"
+                type="select"
+                required={true}
+                options={Object.entries(Roast)
+                  .filter(([key]) => isNaN(Number(key)))
+                  .map(([key]) => ({ value: key, label: key }))}
+                defaultValue={recipe?.roast ? Object.keys(Roast).find(key => Roast[key as keyof typeof Roast] === recipe.roast) : ""}
+              />
+              <FormField
+                label="Grind Size"
+                name="grindSize"
+                id="grindSize"
+                placeholder='Optional'
+                defaultValue={recipe?.grindSize || ""}
+              />
+              <FormField
+                label="Dripper"
+                name="dripper"
+                id="dripper"
+                defaultValue={recipe?.dripper || ""}
+                placeholder='Optional'
+              />
+              <FormField
+                label="Filter"
+                name="filter"
+                id="filter"
+                defaultValue={recipe?.filter || ""}
+                placeholder='Optional'
+              />
+              
+              
             </div>
-            
-          </div> 
-          
-
-          {/* Brewing Properties */}
-          <h1 className='text-xl text-center'>Brewing Properties</h1>
-          <div className='grid grid-cols-2 gap-4'>
-            <FormField
-              label="Coffee Weight (g)"
-              name="coffeeWeight"
-              id="coffeeWeight"
-              type="number"
-              required={true}
-              defaultValue={recipe?.coffeeWeight?.toString() || ""}
-            />
-            <FormField
-              label="Water Weight (g)"
-              name="waterWeight"
-              id="waterWeight"
-              type="number"
-              required={true}
-              defaultValue={recipe?.waterWeight?.toString() || ""}
-            />  
-            <FormField
-              label="Temperature (°C)"
-              name="temperature"
-              id="temperature"
-              required={true}
-              type="number"
-              defaultValue={recipe?.temperature?.toString() || ""}
-            />
-            <FormField
-              label="Roast Level"
-              name="roast"
-              id="roast"
-              type="select"
-              required={true}
-              options={Object.entries(Roast)
-                .filter(([key]) => isNaN(Number(key)))
-                .map(([key]) => ({ value: key, label: key }))}
-              defaultValue={recipe?.roast ? Object.keys(Roast).find(key => Roast[key as keyof typeof Roast] === recipe.roast) : ""}
-            />
-            <FormField
-              label="Grind Size"
-              name="grindSize"
-              id="grindSize"
-              placeholder='Optional'
-              defaultValue={recipe?.grindSize || ""}
-            />
-            <FormField
-              label="Dripper"
-              name="dripper"
-              id="dripper"
-              defaultValue={recipe?.dripper || ""}
-              placeholder='Optional'
-            />
-            <FormField
-              label="Filter"
-              name="filter"
-              id="filter"
-              defaultValue={recipe?.filter || ""}
-              placeholder='Optional'
-            />
-            
-            
           </div>
  
         </div>
@@ -320,10 +317,10 @@ export default function RecipeSettings({ recipeId, editMode = false }: Props) {
         
 
         {/* Steps Section */}
-        <div className="flex flex-col gap-4 grow w-full lg:overflow-y-scroll lg:h-[calc(100dvh-6rem)] lg:pr-4"> 
-          <h2 className="text-xl text-center px-4">Brewing Steps</h2>
-          <div className="space-y-4">
-            <div className='items-center gap-2 bg-card/70 p-4'>
+        <div className="flex flex-col grow w-full lg:overflow-y-scroll lg:h-[calc(100dvh-6rem)] lg:pr-4"> 
+          <h2 className="text-2xl text-center p-2">Brewing Steps</h2>
+          <div className="">
+            <div className='items-center bg-card/70 p-4'>
               <label htmlFor="preparation" className="block text-sm font-medium text-secondary">
                 Preparation Notes
               </label>

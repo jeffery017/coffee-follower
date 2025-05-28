@@ -34,7 +34,7 @@ export default function TagInput({ tags = [], onChange, editMode = true, placeho
       {tags.map((tag) => (
         <span
           key={tag}
-          className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm bg-primary/10 text-primary uppercase"
+          className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs bg-primary/10 text-primary uppercase"
         >
           {tag}
           {editMode && (
@@ -51,10 +51,10 @@ export default function TagInput({ tags = [], onChange, editMode = true, placeho
         <input
           type="text"
           value={inputValue}
-          onChange={(e) => setInputValue(e.target.value.toUpperCase())}
+          onChange={(e) => setInputValue(e.target.value.toLowerCase())}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
-          className="flex-1 min-w-[120px] bg-transparent border-none outline-none text-sm uppercase placeholder:text-primary/15"
+          className="flex-1 min-w-[120px] bg-transparent border-none outline-none  uppercase placeholder:text-primary/15 scale-90"
         />
       )}
     </div>
