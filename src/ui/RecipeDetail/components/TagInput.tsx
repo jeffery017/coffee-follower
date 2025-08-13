@@ -46,17 +46,19 @@ export default function TagInput({ tags = [], onChange, editMode = true, placeho
             </button>
           )}
         </span>
-      ))}
-      {editMode && (
-        <input
-          type="text"
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value.toLowerCase())}
-          onKeyDown={handleKeyDown}
-          placeholder={placeholder}
-          className="flex-1 min-w-[120px] bg-transparent border-none outline-none  uppercase placeholder:text-primary/15 scale-90"
-        />
-      )}
+      ))} 
+        {editMode && (
+          <input
+            type="text"
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value.toLowerCase())}
+            onKeyDown={handleKeyDown}
+            placeholder={placeholder}
+            className="px-2 py-1 w-auto rounded-full bg-gray-100 border-none outline-none uppercase placeholder:text-primary/15 text-sm"
+            // @ts-ignore
+            style={{ fieldSizing: 'content' }}
+          /> 
+        )}  
     </div>
   );
 } 

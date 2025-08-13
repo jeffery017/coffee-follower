@@ -1,21 +1,16 @@
-import { Timestamp } from 'firebase/firestore';
 import { z } from 'zod';
+import { Roast } from './Roast';
 
 export const RECIPE_COLLECTION_NAME = "recipes";
 
-export enum Roast {
-  LIGHT = "LIGHT",
-  MEDIUM = "MEDIUM",
-  DARK = "DARK",
-}
 
 
 // Schema for preparation details
-export const preparationSchema = z.object({ 
+export const recipePreparationSchema = z.object({ 
   notes: z.string().optional(),
 });
 
-export enum stepActionType {
+export enum RecipeStepActionType {
   CENTER_POURING = "CENTER_POURING",
   CIRCLE_POURING = "CIRCLE_POURING",
   STIRRING = "STIRRING",
@@ -23,16 +18,16 @@ export enum stepActionType {
 }
 
 // Schema for recipe actions
-export const actionSchema = z.object({ 
-  action: z.nativeEnum(stepActionType).optional(),
-  targetTime: z.number().min(0, "Target time cannot be negative").optional(),
-  targetGram: z.number().positive("Target quantity must be positive").optional(),
+export const recipeActionSchema = z.object({ 
+  action: z.nativeEnum(RecipeStepActionType).optional(),
+  duration: z.number().min(0, "Target time cannot be negative").optional(),
+  weight: z.number().positive("Target quantity must be positive").optional(),
 });
 
 // Schema for recipe steps
-export const stepSchema = z.object({
+export const recipeStepSchema = z.object({
   name: z.string().min(1, "Step name is required"),
-  actions: z.array(actionSchema).min(1, "At least one action is required"), 
+  actions: z.array(recipeActionSchema).min(1, "At least one action is required"), 
   instruction: z.string().optional(),
 });
 
@@ -40,12 +35,12 @@ export const stepSchema = z.object({
 export const recipeSchema = z.object({
   id: z.string().optional(),
   uid: z.string().min(1, "Author is required"),
-  createdAt: z.instanceof(Timestamp).optional(),
-  updatedAt: z.instanceof(Timestamp).optional(),
+  createdAt: z.number().optional(),
+  updatedAt: z.number().optional(),
   title: z.string().min(1, "Title is required"),
   subtitle: z.string().optional(),
   introduction: z.string().optional(),
-  preparation: preparationSchema,
+  preparation: recipePreparationSchema,
   // Properties
   temperature: z.number().positive("Temperature must be positive").optional(),
   time: z.number().positive("Time must be positive").optional(),
@@ -54,16 +49,16 @@ export const recipeSchema = z.object({
   coffeeToWaterRatio: z.number().positive("Coffee to water ratio must be positive").optional(),
   roast: z.nativeEnum(Roast).optional(),
   grindSize: z.string().optional(),
-  dripper: z.string().optional(),
-  filter: z.string().optional(),
+  dripper: z.array(z.string()).optional(),
+  filter: z.array(z.string()).optional(),
   // Tags 
-  flavors: z.array(z.string()).optional(),
-  steps: z.array(stepSchema).min(1, "At least one step is required"),
+  tags: z.array(z.string()).optional(),
+  steps: z.array(recipeStepSchema).min(1, "At least one step is required"),
 });
 
 // Types inferred from schemas
 export type Recipe = z.infer<typeof recipeSchema>;
-export type Preparation = z.infer<typeof preparationSchema>;
-export type RecipeAction = z.infer<typeof actionSchema>;
-export type RecipeStep = z.infer<typeof stepSchema>;
+export type Preparation = z.infer<typeof recipePreparationSchema>;
+export type RecipeAction = z.infer<typeof recipeActionSchema>;
+export type RecipeStep = z.infer<typeof recipeStepSchema>;
 

@@ -1,7 +1,7 @@
 "use client";
-import MinusButton from '@/components/common/MinusButton';
-import PlusButton from '@/components/common/PlusButton';
-import { RecipeAction, RecipeStep, stepActionType } from '@/utils/schemas/Recipe';
+import MinusButton from '@/ui/common/MinusButton';
+import PlusButton from '@/ui/common/PlusButton';
+import { RecipeAction, RecipeStep, RecipeStepActionType } from '@/utils/schemas/Recipe';
 import { useEffect, useRef, useState } from 'react';
 import RecipeActionForm from './RecipeActionForm';
 
@@ -14,10 +14,10 @@ interface Props {
 }
 
 const actionTypeDisplayNames = {
-  [stepActionType.CENTER_POURING]: 'Center Pouring',
-  [stepActionType.CIRCLE_POURING]: 'Circle Pouring',
-  [stepActionType.STIRRING]: 'Stirring',
-  [stepActionType.WAITING]: 'Waiting', 
+  [RecipeStepActionType.CENTER_POURING]: 'Center Pouring',
+  [RecipeStepActionType.CIRCLE_POURING]: 'Circle Pouring',
+  [RecipeStepActionType.STIRRING]: 'Stirring',
+  [RecipeStepActionType.WAITING]: 'Waiting', 
 } as const;
 
 export default function RecipeStepEntity({ step, stepIndex, onUpdate, onRemove, editMode = false }: Props) {
@@ -49,12 +49,12 @@ export default function RecipeStepEntity({ step, stepIndex, onUpdate, onRemove, 
     }
   }, [localStep.instruction]);
 
-  const addAction = (actionType: stepActionType) => {
+  const addAction = (actionType: RecipeStepActionType) => {
     const lastAction = localStep.actions[localStep.actions.length - 1];
     const newAction: RecipeAction = {
       action: actionType,
-      targetTime: lastAction?.targetTime ? lastAction.targetTime + 10 : undefined,
-      targetGram: lastAction?.targetGram,
+      duration: lastAction?.duration ? lastAction.duration + 10 : undefined,
+      weight: lastAction?.weight,
     };
     setLocalStep(prev => ({
       ...prev,
@@ -71,13 +71,13 @@ export default function RecipeStepEntity({ step, stepIndex, onUpdate, onRemove, 
     const prevAction = actionIndex > 0 ? newActions[actionIndex - 1] : undefined;
 
     // Ensure targetTime is not less than previous action's targetTime
-    if (updatedAction.targetTime !== undefined && prevAction?.targetTime !== undefined) {
-      updatedAction.targetTime = Math.max(updatedAction.targetTime, prevAction.targetTime);
+    if (updatedAction.duration !== undefined && prevAction?.duration !== undefined) {
+      updatedAction.duration = Math.max(updatedAction.duration, prevAction.duration);
     }
 
     // Ensure targetQuantity is not less than previous action's targetQuantity
-    if (updatedAction.targetGram !== undefined && prevAction?.targetGram !== undefined) {
-      updatedAction.targetGram = Math.max(updatedAction.targetGram, prevAction.targetGram);
+    if (updatedAction.weight !== undefined && prevAction?.weight !== undefined) {
+      updatedAction.weight = Math.max(updatedAction.weight, prevAction.weight);
     }
 
     newActions[actionIndex] = updatedAction;
@@ -100,7 +100,7 @@ export default function RecipeStepEntity({ step, stepIndex, onUpdate, onRemove, 
   };
 
   return (
-    <div className={`relative p-4 flex flex-col gap-4 items-center justify-between ${stepIndex % 2 === 0 ? 'bg-card' : 'bg-card/70'}`}>
+    <div className={`relative p-4 gap-4 flex flex-col items-center justify-between ${stepIndex % 2 === 0 ? 'bg-card' : 'bg-card/70'}`}>
         {editMode && stepIndex > 0 && (  
           <div className='absolute top-3 left-3 text-background'>
             <button onClick={onRemove ?? (() => {})}>
@@ -126,9 +126,11 @@ export default function RecipeStepEntity({ step, stepIndex, onUpdate, onRemove, 
               editMode={editMode}
             />
           ))} 
-        </div> 
-        <div className='w-full border-t border-primary'></div>
+        </div>  
+        {/* Add Action Button */}
         {editMode && (
+        <>
+        <div className='w-full border-t border-primary'></div>
         <div className="flex items-center justify-start w-full text-background gap-2">
           <div className="relative" ref={optionsRef}>
             <button
@@ -147,7 +149,7 @@ export default function RecipeStepEntity({ step, stepIndex, onUpdate, onRemove, 
                     key={actionType}
                     type="button"
                     onClick={() => {
-                      addAction(actionType as stepActionType);
+                      addAction(actionType as RecipeStepActionType);
                       setShowActionOptions(false);
                     }}
                     className="w-full px-4 py-2 text-left hover:bg-primary/10 flex items-center gap-2"
@@ -160,10 +162,13 @@ export default function RecipeStepEntity({ step, stepIndex, onUpdate, onRemove, 
             )}
           </div>
         </div>
+        </>
       )} 
-      <div className='w-full border-t border-primary'></div>
-        {editMode ? (
-          <textarea
+      {/* Instruction */} 
+        {(editMode || localStep.instruction) && (
+          <> 
+            <div className='w-full border-t border-primary'></div>
+            <textarea
             ref={instructionRef}
             value={localStep.instruction || ''}
             onChange={(e) => handleStepChange('instruction', e.target.value)}
@@ -171,9 +176,8 @@ export default function RecipeStepEntity({ step, stepIndex, onUpdate, onRemove, 
             placeholder="Add Instruction..."
             className="w-full p-2 border-b border-primary text-background placeholder:text-background outline-none resize-none overflow-hidden"
             rows={1}
-          />
-        ) : (
-          <p>{localStep.instruction}</p>
+            />
+          </> 
         )}
       
     </div>

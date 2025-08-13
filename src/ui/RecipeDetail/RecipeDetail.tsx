@@ -1,7 +1,9 @@
 'use client';
 
 import { RecipeRepository } from '@/utils/firebase/RecipeRepository';
-import { Recipe, recipeSchema, RecipeStep, Roast } from '@/utils/schemas/Recipe';
+import { Recipe, RecipeStep, Roast, recipeSchema } from '@/utils/schemas';
+
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import PlusButton from '../common/PlusButton';
@@ -15,7 +17,7 @@ interface Props {
   editMode: boolean;
 }
 
-export default function RecipeSettings({ recipeId, editMode = false }: Props) {
+export default function RecipeDetail({ recipeId, editMode = false }: Props) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false); 
   const [steps, setSteps] = useState<RecipeStep[]>([ ]);
@@ -42,6 +44,22 @@ export default function RecipeSettings({ recipeId, editMode = false }: Props) {
         .finally(() => setLoading(false));
     }
     else {
+      setRecipe({
+        id: '',
+        uid: 'user123',
+        title: '',
+        subtitle: '',
+        introduction: '',
+        preparation: { notes: '' },
+        steps: [{
+          name: "Step 1",
+          instruction: "",
+          actions: []
+        }],
+        dripper: [],
+        filter: [],
+        tags: []
+      });
       setSteps([
         {
           name: "Step 1",
@@ -96,21 +114,21 @@ export default function RecipeSettings({ recipeId, editMode = false }: Props) {
         subtitle: formData.get('subtitle') as string || '',
         introduction: formData.get('introduction') as string || '',
         roast: formData.get('roast') as Roast || undefined,
-        dripper: formData.get('dripper') as string || '',
-        filter: formData.get('filter') as string || '',
         grindSize: formData.get('grindSize') as string || '',
         temperature: formData.get('temperature') ? Number(formData.get('temperature')) : undefined,
         coffeeWeight: formData.get('coffeeWeight') ? Number(formData.get('coffeeWeight')) : undefined,
         waterWeight: formData.get('waterWeight') ? Number(formData.get('waterWeight')) : undefined,
-        flavors: recipe?.flavors || [],
+        tags: recipe?.tags || [],
+        dripper: recipe?.dripper || [],
+        filter: recipe?.filter || [],
         preparation: { notes: formData.get('preparation.notes') as string || '' },
         steps: steps.map(step => ({
           name: step.name,
           instruction: step.instruction || '',
           actions: step.actions.map(action => ({
             action: action.action,
-            targetTime: action.targetTime,
-            targetGram: action.targetGram, 
+            duration: action.duration,
+            weight: action.weight, 
           })).filter(action => action.action !== undefined),
         }))
       });
@@ -150,11 +168,11 @@ export default function RecipeSettings({ recipeId, editMode = false }: Props) {
     }
   };
 
-  const handleFlavorChange = (newTags: string[]) => {
+  const handleTagsChange = (newTags: string[]) => {
     if (recipe) {
       setRecipe({
         ...recipe,
-        flavors: newTags
+        tags: newTags
       });
     } else {
       // For new recipes
@@ -166,7 +184,7 @@ export default function RecipeSettings({ recipeId, editMode = false }: Props) {
         introduction: '',
         preparation: { notes: '' },
         steps: steps,
-        flavors: newTags
+        tags: newTags
       });
     }
   };
@@ -184,48 +202,47 @@ export default function RecipeSettings({ recipeId, editMode = false }: Props) {
           <div className='space-y-4 p-4'>
             {/* Title */} 
             <div>
-              <input
-                type="text"
-                name="title"
-                id="title" 
-                required
-                className="form-input text-3xl md:text-4xl uppercase placeholder:text-primary/15"
-                defaultValue={recipe?.title || ""}
-                placeholder="recipe title"
-                onChange={(e) => e.target.value = e.target.value.toUpperCase()}
-              />
+              <div className='flex items-center justify-between gap-2'>
+                <input
+                  type="text"
+                  name="title"
+                  id="title" 
+                  required
+                  disabled={!editMode}
+                  className="form-input text-3xl md:text-4xl uppercase placeholder:text-primary/15"
+                  defaultValue={recipe?.title || ""}
+                  placeholder="recipe title"
+                  onChange={(e) => e.target.value = e.target.value.toUpperCase()}
+                />
+                {recipeId && ( 
+                  <Link href={`/recipes/${recipe?.id}/play`} >
+                    <div className='px-4 py-2 bg-primary text-background flex items-center gap-2'> 
+                        <span>Play</span>
+                    </div>
+                  </Link>
+                )}
+
+              </div>
 
               {/* Subtitle */}
               <input
                 type="text"
                 name="subtitle"
                 id="subtitle"
+                disabled={!editMode}
                 className="form-input text-xl placeholder:text-primary/15"
                 defaultValue={recipe?.subtitle || ""}
                 placeholder="recipe subtitle"
               />
             </div>
-              {/* Flavors Section */}
+              {/* Tags Section */}
               <TagInput
-                tags={recipe?.flavors || []}
-                placeholder="Add flavor..."
-                onChange={handleFlavorChange}
+                tags={recipe?.tags || []}
+                placeholder="Add Tag..."
+                onChange={handleTagsChange}
                 editMode={editMode}
               />  
             {/* Description */}
-            
-              
-              
-            {/* Tags Section */}
-            {/* <div className='border-b pb-2 border-border'>
-                <TagInput
-                  tags={recipe?.tags || []}
-                  onChange={handleTagsChange}
-                  editMode={editMode}
-              /> 
-                
-            </div> */}
-            
           </div> 
           
 
@@ -240,6 +257,7 @@ export default function RecipeSettings({ recipeId, editMode = false }: Props) {
                 name="introduction"
                 id="introduction"
                 rows={1}
+                disabled={!editMode}
                 className="form-input resize-none overflow-hidden placeholder:text-primary/15 border-b border-border"
                 defaultValue={recipe?.introduction || ""}
                 placeholder="Add introduction..."
@@ -248,12 +266,14 @@ export default function RecipeSettings({ recipeId, editMode = false }: Props) {
             </div> 
             <h1 className='text-xl'>Properties</h1>
             <div className='grid grid-cols-2 gap-4'>
+             
               <FormField
                 label="Coffee Weight (g)"
                 name="coffeeWeight"
                 id="coffeeWeight"
                 type="number"
                 required={true}
+                disabled={!editMode}
                 defaultValue={recipe?.coffeeWeight?.toString() || ""}
               />
               <FormField
@@ -262,14 +282,16 @@ export default function RecipeSettings({ recipeId, editMode = false }: Props) {
                 id="waterWeight"
                 type="number"
                 required={true}
+                disabled={!editMode}
                 defaultValue={recipe?.waterWeight?.toString() || ""}
               />  
               <FormField
                 label="Temperature (°C)"
                 name="temperature"
                 id="temperature"
-                required={true}
                 type="number"
+                required={true}
+                disabled={!editMode}
                 defaultValue={recipe?.temperature?.toString() || ""}
               />
               <FormField
@@ -278,37 +300,59 @@ export default function RecipeSettings({ recipeId, editMode = false }: Props) {
                 id="roast"
                 type="select"
                 required={true}
+                disabled={!editMode}
                 options={Object.entries(Roast)
                   .filter(([key]) => isNaN(Number(key)))
                   .map(([key]) => ({ value: key, label: key }))}
                 defaultValue={recipe?.roast ? Object.keys(Roast).find(key => Roast[key as keyof typeof Roast] === recipe.roast) : ""}
               />
+              {editMode || recipe?.grindSize && (
               <FormField
                 label="Grind Size"
                 name="grindSize"
                 id="grindSize"
                 placeholder='Optional'
                 defaultValue={recipe?.grindSize || ""}
-              />
-              <FormField
-                label="Dripper"
-                name="dripper"
-                id="dripper"
-                defaultValue={recipe?.dripper || ""}
-                placeholder='Optional'
-              />
-              <FormField
-                label="Filter"
-                name="filter"
-                id="filter"
-                defaultValue={recipe?.filter || ""}
-                placeholder='Optional'
-              />
-              
-              
+              /> 
+              )}
+              {(editMode || recipe?.dripper) && (
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-secondary">Dripper</label>
+                  <TagInput
+                    tags={recipe?.dripper || []}
+                    placeholder="Add dripper..."
+                    onChange={(newDrippers) => {
+                      if (recipe) {
+                        setRecipe({
+                          ...recipe,
+                          dripper: newDrippers
+                        });
+                      }
+                    }}
+                    editMode={editMode}
+                  />
+                </div>
+              )}
+              {(editMode || recipe?.filter) && (
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-secondary">Filter</label>
+                  <TagInput
+                    tags={recipe?.filter || []}
+                    placeholder="Add filter..."
+                    onChange={(newFilters) => {
+                      if (recipe) {
+                        setRecipe({
+                          ...recipe,
+                          filter: newFilters
+                        });
+                      }
+                    }}
+                    editMode={editMode}
+                  />
+                </div>
+              )}
             </div>
-          </div>
- 
+          </div> 
         </div>
 
         
@@ -319,23 +363,25 @@ export default function RecipeSettings({ recipeId, editMode = false }: Props) {
         {/* Steps Section */}
         <div className="flex flex-col grow w-full lg:overflow-y-scroll lg:h-[calc(100dvh-6rem)] lg:pr-4"> 
           <h2 className="text-2xl text-center p-2">Brewing Steps</h2>
-          <div className="">
+          {/* Preparation Notes */}
+          {editMode || recipe?.preparation?.notes && (
             <div className='items-center bg-card/70 p-4'>
-              <label htmlFor="preparation" className="block text-sm font-medium text-secondary">
-                Preparation Notes
-              </label>
-              <textarea
-                ref={preparationRef}
-                name="preparation.notes"
-                id="preparation"
-                rows={1}
-                className="form-input border-b border-primary resize-none overflow-hidden text-background placeholder:text-background/80"
-                defaultValue={recipe?.preparation?.notes || ""}
-                placeholder="Add notes..."
-                onInput={(e) => adjustTextareaHeight(e.currentTarget)}
-              />
-            </div>
+            <label htmlFor="preparation" className="block text-sm font-medium text-secondary">
+              Preparation Notes
+            </label>
+            <textarea
+              ref={preparationRef}
+              name="preparation.notes"
+              id="preparation"
+              rows={1}
+              disabled={!editMode}
+              className="form-input border-b border-primary resize-none overflow-hidden text-background placeholder:text-background/80"
+              defaultValue={recipe?.preparation?.notes || ""}
+              placeholder="Add notes..."
+              onInput={(e) => adjustTextareaHeight(e.currentTarget)}
+            /> 
           </div>
+          )}
 
           <div className="space-y-4">
             <div className="flex flex-col">
@@ -349,19 +395,21 @@ export default function RecipeSettings({ recipeId, editMode = false }: Props) {
                   editMode={editMode}
                 />
               ))}
-              <div className={`flex items-center justify-center text-background p-4 ${steps.length%2 === 0 ? 'bg-card' : 'bg-card/70'}`}>
-                {editMode && (
+              {editMode && (
+                <div className={`flex items-center justify-center text-background p-4 ${steps.length%2 === 0 ? 'bg-card' : 'bg-card/70'}`}>
                   <button type="button" onClick={addStep} className='flex items-center gap-2'>
                     <PlusButton size={32} /> 
                     <span className=''>Add Step</span>
                   </button>
-                )}
-              </div>
+                </div>
+              )}
             </div>
           </div>
         </div> 
       </form>
 
+      {/* Submit Button */}
+      {editMode && (
       <div className='flex items-center justify-center px-4 py-4'>
         <div className='flex flex-col items-center gap-2'>
         <button
@@ -374,14 +422,14 @@ export default function RecipeSettings({ recipeId, editMode = false }: Props) {
             ? (recipeId ? 'Updating...' : 'Creating...')
             : (recipeId ? 'Update Recipe' : 'Create Recipe')}
         </button>
-        { editMode && recipeId && (
+        { recipeId && (
           <button className='text-red-500 px-4 py-2 rounded-md' onClick={handleDelete}>
             Delete Recipe
           </button> 
         )}  
         </div>
       </div>
-      
+      )}
     </div>
   );
 } 

@@ -1,9 +1,9 @@
 'use client';
 
-import RecipeSettings from "@/components/RecipeDetail/RecipeForm";
+import RecipeDetail from "@/ui/RecipeDetail/RecipeDetail";
 
 export default function CreateRecipePage() {
     return (
-        <RecipeSettings editMode={true} />
+        <RecipeDetail editMode={true} />
     );
 } 

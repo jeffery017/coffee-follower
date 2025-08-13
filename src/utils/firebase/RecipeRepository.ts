@@ -1,5 +1,5 @@
-import { CollectionReference, DocumentSnapshot, Firestore, Timestamp, addDoc, collection, deleteDoc, doc, getDoc, getDocs, limit, orderBy, query, startAfter, updateDoc } from "firebase/firestore";
-import { Recipe } from "../schemas/Recipe";
+import { CollectionReference, DocumentSnapshot, Firestore, addDoc, collection, deleteDoc, doc, getDoc, getDocs, limit, orderBy, query, startAfter, updateDoc } from "firebase/firestore";
+import { Recipe, recipeSchema } from "../schemas/Recipe";
 import { firestore } from "./app";
 
 const RECIPE_COLLECTION_NAME = "recipes";
@@ -21,8 +21,8 @@ export class RecipeRepository {
   // CRUD operations
   async create(recipe: Recipe): Promise<string> { 
     try {
-      recipe.createdAt = Timestamp.fromDate(new Date());
-      recipe.updatedAt = Timestamp.fromDate(new Date());
+      recipe.createdAt = new Date().getTime();
+      recipe.updatedAt = new Date().getTime();
       const docRef = await addDoc(this.recipesCollection, recipe);
       return docRef.id;
     } catch (error) {
@@ -36,7 +36,7 @@ export class RecipeRepository {
       throw new Error("Recipe has no ID");
     }
     try {
-      recipe.updatedAt = Timestamp.fromDate(new Date());
+      recipe.updatedAt = new Date().getTime();
       const docRef = doc(this.recipesCollection, recipe.id);
       if (!docRef) {
         throw new Error(`Recipe ${recipe.title} with id ${recipe.id} not found`);
@@ -62,10 +62,7 @@ export class RecipeRepository {
     try {
       const docRef = doc(this.recipesCollection, id);
       const docSnap = await getDoc(docRef);
-      const recipe = docSnap.data() as Recipe | null; 
-      if (recipe) {
-        recipe.id = id;
-      }
+      const recipe = recipeSchema.parse({...docSnap.data(), id: docSnap.id}) as Recipe | null; 
       return recipe;
     } catch (error) {
       console.error(`Error getting recipe with id ${id}:`, error);

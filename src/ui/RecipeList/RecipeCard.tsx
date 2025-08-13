@@ -1,4 +1,4 @@
-import { Recipe, Roast } from '@/utils/schemas/Recipe';
+import { Recipe, Roast } from '@/utils/schemas';
 
 interface Props {
   recipe: Recipe;
@@ -31,12 +31,12 @@ export default function RecipeCardEntity({ recipe }: Props) {
           </span>
         )}
         
-        {recipe.flavors?.map((flavor) => (
+        {recipe.tags?.map((tag) => (
           <span
-            key={flavor}
+            key={tag}
             className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 uppercase"
           >
-            {flavor}
+            {tag}
           </span>
         ))}
       </div>

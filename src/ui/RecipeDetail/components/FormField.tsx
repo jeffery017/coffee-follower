@@ -8,6 +8,7 @@ interface FormFieldProps {
   defaultValue?: string;
   placeholder?: string;
   required?: boolean;
+  disabled?: boolean;
   className?: string;
   options?: { value: string; label: string }[];
   onChange?: (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
@@ -21,6 +22,7 @@ export default function FormField({
   defaultValue = '',
   placeholder = '',
   required = false,
+  disabled = false,
   className = '',
   options,
   onChange
@@ -58,6 +60,7 @@ export default function FormField({
           defaultValue={defaultValue}
           placeholder={placeholder}
           required={required}
+          disabled={disabled}
           onChange={onChange}
           min={type === 'number' ? 0 : undefined}
           step={type === 'number' ? 'any' : undefined}
